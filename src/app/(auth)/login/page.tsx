@@ -1,0 +1,119 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/Button'
+import { Package, AlertCircle } from 'lucide-react'
+
+export default function LoginPage() {
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setIsLoading(true)
+
+    try {
+      const supabase = createClient()
+      const { error: authError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      })
+
+      if (authError) {
+        if (authError.message.includes('Invalid login credentials')) {
+          setError('Email o contraseña incorrectos')
+        } else if (authError.message.includes('Email not confirmed')) {
+          setError('Tu email no está confirmado. Revisá tu bandeja de entrada.')
+        } else {
+          setError(authError.message)
+        }
+        return
+      }
+
+      router.push('/inventario')
+      router.refresh()
+    } catch {
+      setError('Error inesperado. Intentá de nuevo.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-sm space-y-8">
+        {/* Logo */}
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#853f9a] shadow-lg">
+            <Package size={32} className="text-white" />
+          </div>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-[#853f9a]">Berry Design</h1>
+            <p className="text-sm text-gray-500">Sistema de gestión de stock</p>
+          </div>
+        </div>
+
+        {/* Form card */}
+        <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">Iniciar sesión</h2>
+            <p className="mt-1 text-sm text-gray-500">
+              Ingresá tus credenciales para acceder
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label="Email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tu@email.com"
+              autoComplete="email"
+              disabled={isLoading}
+            />
+
+            <Input
+              label="Contraseña"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              autoComplete="current-password"
+              disabled={isLoading}
+            />
+
+            {error && (
+              <div className="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5">
+                <AlertCircle size={15} className="mt-0.5 shrink-0 text-red-600" />
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              className="w-full"
+              isLoading={isLoading}
+              size="lg"
+            >
+              Iniciar sesión
+            </Button>
+          </form>
+        </div>
+
+        <p className="text-center text-xs text-gray-400">
+          Berry Design · Stock Manager · {new Date().getFullYear()}
+        </p>
+      </div>
+    </div>
+  )
+}
