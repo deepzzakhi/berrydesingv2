@@ -94,7 +94,7 @@ export default function ProductoDetailPage() {
             <ArrowLeft size={16} />
             Volver al inventario
           </Link>
-          <Link href={`/productos/${id}/editar`}>
+          <Link href={`/inventario/${id}/editar`}>
             <Button variant="outline" size="sm">
               <Edit size={15} />
               Editar
