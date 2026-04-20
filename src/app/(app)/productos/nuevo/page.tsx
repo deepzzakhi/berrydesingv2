@@ -8,16 +8,11 @@ import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { ArrowLeft, ArrowRight, Check, AlertCircle } from 'lucide-react'
 import type { TipoProducto } from '@/types/producto'
-
-const TIPO_OPTIONS = [
-  { value: 'matera', label: 'Matera' },
-  { value: 'porta_anteojos', label: 'Porta anteojos' },
-  { value: 'cubre_bidon', label: 'Cubre bidón' },
-  { value: 'alfombra_vinilica', label: 'Alfombra vinílica' },
-]
+import { useTiposProducto } from '@/hooks/useTiposProducto'
 
 export default function NuevoProductoPage() {
   const router = useRouter()
+  const { tipos } = useTiposProducto()
   const [step, setStep] = useState<1 | 2>(1)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -26,6 +21,9 @@ export default function NuevoProductoPage() {
   const [codigoTela, setCodigoTela] = useState('')
   const [tipo, setTipo] = useState<TipoProducto | ''>('')
   const [fotoUrl, setFotoUrl] = useState('')
+
+  const tipoOptions = tipos.map((t) => ({ value: t.codigo, label: t.nombre }))
+  const tipoSeleccionado = tipos.find((t) => t.codigo === tipo)
 
   // Step 2
   const [medida, setMedida] = useState('')
@@ -145,7 +143,7 @@ export default function NuevoProductoPage() {
                   required
                   value={tipo}
                   onChange={(e) => setTipo(e.target.value as TipoProducto)}
-                  options={TIPO_OPTIONS}
+                  options={tipoOptions}
                   placeholder="Seleccioná un tipo"
                 />
 
@@ -178,7 +176,7 @@ export default function NuevoProductoPage() {
                   </p>
                 </div>
 
-                {tipo === 'alfombra_vinilica' && (
+                {tipoSeleccionado?.requiere_medida && (
                   <Input
                     label="Medida"
                     value={medida}

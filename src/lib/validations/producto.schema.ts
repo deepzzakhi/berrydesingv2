@@ -31,7 +31,7 @@ export const createProductoSchema = z.object({
   codigo_tela: z
     .string()
     .min(1, 'El código de tela es obligatorio'),
-  tipo: tipoProductoEnum,
+  tipo: z.string().min(1, 'El tipo es obligatorio'),
   medida: z.string().nullable().optional(),
   cantidad: z
     .number({ invalid_type_error: 'La cantidad debe ser un número' })
@@ -57,10 +57,8 @@ export const registrarMovimientoSchema = z.object({
 
 export const filtrosInventarioSchema = z.object({
   busqueda: z.string().optional(),
-  estado: z.enum(['todos', 'stock', 'reservado', 'vendido']).optional(),
-  tipo: z
-    .enum(['todos', 'matera', 'porta_anteojos', 'cubre_bidon', 'alfombra_vinilica'])
-    .optional(),
+  estado: z.string().optional(),
+  tipo: z.string().optional(),
 })
 
 export type CreateTelaInput = z.infer<typeof createTelaSchema>
