@@ -32,7 +32,7 @@ const MOVIMIENTO_ICON_COLOR: Record<string, string> = {
   ingreso_stock: 'text-blue-600 bg-blue-50 border-blue-200',
   reserva: 'text-amber-600 bg-amber-50 border-amber-200',
   confirmacion_venta: 'text-green-600 bg-green-50 border-green-200',
-  devolucion_stock: 'text-purple-600 bg-purple-50 border-purple-200',
+  devolucion_stock: 'text-red-700 bg-red-50 border-red-200',
   ajuste_cantidad: 'text-gray-600 bg-gray-50 border-gray-200',
 }
 

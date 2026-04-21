@@ -3,11 +3,11 @@
 /* ── Berry Brand Variables ─────────────────────────────────────────────────── */
 :root {
   /* Berry brand */
-  --berry-purple: #853f9a;
-  --berry-purple-dark: #6d3380;
-  --berry-purple-light: #a855c8;
-  --berry-purple-50: #f9f0fb;
-  --berry-purple-100: #f1dff6;
+  --berry-purple: #851919;
+  --berry-purple-dark: #6b1414;
+  --berry-purple-light: #a32020;
+  --berry-purple-50: #fdf2f2;
+  --berry-purple-100: #fce4e4;
 
   /* Estado colors */
   --color-stock: #16a34a;

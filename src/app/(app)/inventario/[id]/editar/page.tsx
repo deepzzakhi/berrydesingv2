@@ -25,6 +25,7 @@ export default function EditarProductoPage() {
 
   const [cantidad, setCantidad] = useState('')
   const [medida, setMedida] = useState('')
+  const [precioUnitario, setPrecioUnitario] = useState('')
   const [fotoUrl, setFotoUrl] = useState('')
   const [observaciones, setObservaciones] = useState('')
   const [isSaving, setIsSaving] = useState(false)
@@ -34,6 +35,7 @@ export default function EditarProductoPage() {
     if (producto) {
       setCantidad(String(producto.cantidad))
       setMedida(producto.medida ?? '')
+      setPrecioUnitario(producto.precio_unitario != null ? String(producto.precio_unitario) : '')
       setFotoUrl(producto.tela?.foto_url ?? '')
       setObservaciones(producto.tela?.observaciones ?? '')
     }
@@ -53,6 +55,7 @@ export default function EditarProductoPage() {
         body: JSON.stringify({
           cantidad: parseInt(cantidad, 10) || 0,
           medida: medida.trim() || null,
+          precio_unitario: precioUnitario ? parseFloat(precioUnitario) : null,
         }),
       })
 
@@ -133,6 +136,17 @@ export default function EditarProductoPage() {
                 value={cantidad}
                 onChange={(e) => setCantidad(e.target.value)}
                 helperText="Unidades actuales en stock"
+              />
+
+              <Input
+                label="Precio unitario ($)"
+                type="number"
+                step="0.01"
+                min="0"
+                value={precioUnitario}
+                onChange={(e) => setPrecioUnitario(e.target.value)}
+                placeholder="Ej: 1500.00"
+                helperText="Precio de venta por unidad (se usará al vender)"
               />
 
               {tipoSeleccionado?.requiere_medida && (

@@ -30,8 +30,8 @@ const ESTADO_CHIPS: { value: EstadoFiltro; label: string; activeClass: string }[
     activeClass: 'bg-amber-500 text-white border-amber-500',
   },
   {
-    value: 'vendido',
-    label: 'Vendido',
+    value: 'cobrado',
+    label: 'Cobrado',
     activeClass: 'bg-gray-400 text-white border-gray-400',
   },
 ]
@@ -87,7 +87,7 @@ export function FiltrosInventario({ onFiltrosChange }: FiltrosInventarioProps) {
             value={busqueda}
             onChange={(e) => handleBusqueda(e.target.value)}
             placeholder="Buscar por código de tela..."
-            className="flex h-10 w-full rounded-md border border-gray-300 bg-white pl-9 pr-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#853f9a] focus:border-transparent transition-colors"
+            className="flex h-10 w-full rounded-md border border-gray-300 bg-white pl-9 pr-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#851919] focus:border-transparent transition-colors"
           />
           {busqueda && (
             <button
@@ -104,7 +104,7 @@ export function FiltrosInventario({ onFiltrosChange }: FiltrosInventarioProps) {
           <select
             value={tipo}
             onChange={(e) => handleTipo(e.target.value as TipoFiltro)}
-            className="flex h-10 w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-8 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#853f9a] focus:border-transparent transition-colors"
+            className="flex h-10 w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-8 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#851919] focus:border-transparent transition-colors"
           >
             {TIPO_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>

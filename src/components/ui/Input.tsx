@@ -30,7 +30,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           className={cn(
             'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400',
-            'focus:outline-none focus:ring-2 focus:ring-[#853f9a] focus:border-transparent',
+            'focus:outline-none focus:ring-2 focus:ring-[#851919] focus:border-transparent',
             'disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500',
             'transition-colors',
             error && 'border-red-500 focus:ring-red-500',

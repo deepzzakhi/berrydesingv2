@@ -121,19 +121,19 @@ export function ImportadorCSV() {
           className={cn(
             'flex flex-col items-center justify-center gap-4 rounded-xl border-2 border-dashed p-12 text-center cursor-pointer transition-all',
             isDragging
-              ? 'border-[#853f9a] bg-purple-50'
+              ? 'border-[#851919] bg-red-50'
               : 'border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100'
           )}
         >
           <div
             className={cn(
               'flex h-16 w-16 items-center justify-center rounded-full transition-colors',
-              isDragging ? 'bg-purple-100' : 'bg-gray-200'
+              isDragging ? 'bg-red-100' : 'bg-gray-200'
             )}
           >
             <Upload
               size={28}
-              className={isDragging ? 'text-[#853f9a]' : 'text-gray-400'}
+              className={isDragging ? 'text-[#851919]' : 'text-gray-400'}
             />
           </div>
           <div>

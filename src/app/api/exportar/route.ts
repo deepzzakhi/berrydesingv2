@@ -12,13 +12,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
     }
 
-    const productos = await getProductos()
+    const { data: productos } = await getProductos()
     const buffer = await exportarProductosExcel(productos)
 
     const fecha = new Date().toISOString().split('T')[0]
     const filename = `berry-stock-${fecha}.xlsx`
 
-    return new NextResponse(buffer, {
+    return new NextResponse(buffer as unknown as BodyInit, {
       status: 200,
       headers: {
         'Content-Type':

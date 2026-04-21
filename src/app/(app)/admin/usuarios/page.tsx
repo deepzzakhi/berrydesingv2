@@ -17,7 +17,7 @@ const ROL_LABELS: Record<RolUsuario, string> = {
 }
 
 const ROL_BADGE_CLASS: Record<RolUsuario, string> = {
-  admin: 'bg-purple-100 text-purple-800 border-purple-200',
+  admin: 'bg-red-100 text-red-800 border-red-200',
   operador: 'bg-blue-100 text-blue-800 border-blue-200',
   consulta: 'bg-gray-100 text-gray-600 border-gray-200',
 }
@@ -83,7 +83,7 @@ export default function UsuariosPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShieldCheck size={18} className="text-[#853f9a]" />
+            <ShieldCheck size={18} className="text-[#851919]" />
             <h2 className="text-sm font-medium text-gray-700">
               Gestión de accesos al sistema
             </h2>
@@ -153,7 +153,7 @@ export default function UsuariosPage() {
                             updateUsuario(usuario.id, { rol: e.target.value as RolUsuario })
                           }}
                           disabled={savingId === usuario.id}
-                          className="h-8 rounded border border-gray-300 bg-white px-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#853f9a]"
+                          className="h-8 rounded border border-gray-300 bg-white px-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#851919]"
                         >
                           <option value="admin">Administrador</option>
                           <option value="operador">Operador</option>

@@ -3,20 +3,20 @@ import type { Producto } from '@/types/producto'
 import { TIPO_LABELS, ESTADO_LABELS } from '@/types/producto'
 import { formatDate } from '@/lib/utils'
 
-const BERRY_PURPLE = 'FF853F9A'
+const BERRY_PURPLE = 'FF851919'
 const WHITE = 'FFFFFFFF'
 const GRAY_LIGHT = 'FFF3F4F6'
 
 const ESTADO_FILL: Record<string, string> = {
   stock: 'FFD1FAE5',
   reservado: 'FFFEF3C7',
-  vendido: 'FFF3F4F6',
+  cobrado: 'FFF3F4F6',
 }
 
 const ESTADO_FONT_COLOR: Record<string, string> = {
   stock: 'FF166534',
   reservado: 'FF92400E',
-  vendido: 'FF374151',
+  cobrado: 'FF374151',
 }
 
 export async function exportarProductosExcel(productos: Producto[]): Promise<Buffer> {
@@ -149,7 +149,7 @@ export async function exportarProductosExcel(productos: Producto[]): Promise<Buf
 
   const totalStock = productos.filter((p) => p.estado === 'stock').length
   const totalReservado = productos.filter((p) => p.estado === 'reservado').length
-  const totalVendido = productos.filter((p) => p.estado === 'vendido').length
+  const totalVendido = productos.filter((p) => p.estado === 'cobrado').length
 
   const summaryData = [
     ['Resumen del Inventario', ''],

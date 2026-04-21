@@ -11,12 +11,13 @@ import { TIPO_LABELS } from '@/types/producto'
 import { BadgeEstado } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { FormMovimiento } from '@/components/movimientos/FormMovimiento'
+import { VenderModal } from '@/components/ventas/VenderModal'
 import { HistorialTimeline } from '@/components/movimientos/HistorialTimeline'
 import { Topbar } from '@/components/layout/Topbar'
 import { useMovimientos } from '@/hooks/useMovimientos'
 import { formatDate } from '@/lib/utils'
 
-type Accion = 'reservar' | 'vender' | 'devolver'
+type Accion = 'reservar' | 'devolver'
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -27,6 +28,7 @@ export default function ProductoDetailPage() {
 
   const [accion, setAccion] = useState<Accion | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const [venderModalOpen, setVenderModalOpen] = useState(false)
 
   const { data: producto, isLoading, mutate } = useSWR<Producto>(
     id ? `/api/productos/${id}` : null,
@@ -173,48 +175,28 @@ export default function ProductoDetailPage() {
             <div className="flex gap-2">
               {producto.estado === 'stock' && (
                 <>
-                  <Button
-                    variant="amber"
-                    className="flex-1"
-                    onClick={() => abrirModal('reservar')}
-                  >
+                  <Button variant="amber" className="flex-1" onClick={() => abrirModal('reservar')}>
                     Reservar
                   </Button>
-                  <Button
-                    variant="green"
-                    className="flex-1"
-                    onClick={() => abrirModal('vender')}
-                  >
-                    Confirmar venta
+                  <Button variant="green" className="flex-1" onClick={() => setVenderModalOpen(true)} disabled={producto.cantidad === 0}>
+                    Vender
                   </Button>
                 </>
               )}
               {producto.estado === 'reservado' && (
                 <>
-                  <Button
-                    variant="green"
-                    className="flex-1"
-                    onClick={() => abrirModal('vender')}
-                  >
-                    Confirmar venta
+                  <Button variant="green" className="flex-1" onClick={() => setVenderModalOpen(true)}>
+                    Vender
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => abrirModal('devolver')}
-                  >
+                  <Button variant="outline" className="flex-1" onClick={() => abrirModal('devolver')}>
                     Devolver a stock
                   </Button>
                 </>
               )}
-              {producto.estado === 'vendido' && (
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => abrirModal('devolver')}
-                >
-                  Devolver a stock
-                </Button>
+              {producto.estado === 'cobrado' && (
+                <div className="flex-1 flex items-center justify-center rounded-md border border-gray-200 bg-gray-50 py-2 text-sm text-gray-500">
+                  Cobrado
+                </div>
               )}
             </div>
           </div>
@@ -237,12 +219,17 @@ export default function ProductoDetailPage() {
         </div>
       </div>
 
-      {/* Movement modal */}
       <FormMovimiento
         producto={producto}
         accion={accion}
         open={modalOpen}
         onOpenChange={setModalOpen}
+        onSuccess={handleSuccess}
+      />
+      <VenderModal
+        producto={producto}
+        open={venderModalOpen}
+        onOpenChange={setVenderModalOpen}
         onSuccess={handleSuccess}
       />
     </div>

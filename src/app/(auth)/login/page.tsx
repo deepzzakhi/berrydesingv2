@@ -51,11 +51,11 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-8">
         {/* Logo */}
         <div className="flex flex-col items-center gap-3">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#853f9a] shadow-lg">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#851919] shadow-lg">
             <Package size={32} className="text-white" />
           </div>
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-[#853f9a]">Berry Design</h1>
+            <h1 className="text-2xl font-bold text-[#851919]">Berry Design</h1>
             <p className="text-sm text-gray-500">Sistema de gestión de stock</p>
           </div>
         </div>

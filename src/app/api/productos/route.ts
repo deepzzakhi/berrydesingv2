@@ -22,9 +22,17 @@ export async function GET(request: NextRequest) {
     const parsed = filtrosInventarioSchema.safeParse(filtrosRaw)
     const filtros = parsed.success ? parsed.data : {}
 
-    const productos = await getProductos(filtros)
+    const limit = Math.min(Number(searchParams.get('limit') ?? 50), 200)
+    const offset = Math.max(Number(searchParams.get('offset') ?? 0), 0)
 
-    return NextResponse.json(productos)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, total } = await getProductos(filtros as any, { limit, offset })
+
+    return NextResponse.json({
+      data,
+      total,
+      hasMore: offset + data.length < total,
+    })
   } catch (error) {
     console.error('[GET /api/productos]', error)
     return NextResponse.json(
@@ -47,14 +55,14 @@ export async function POST(request: NextRequest) {
     const parsed = createProductoSchema.safeParse(body)
 
     if (!parsed.success) {
-      const firstError = parsed.error.errors[0]
       return NextResponse.json(
-        { error: firstError.message },
+        { error: parsed.error.issues[0]?.message ?? 'Datos inválidos' },
         { status: 400 }
       )
     }
 
-    const producto = await createProducto(parsed.data)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const producto = await createProducto(parsed.data as any)
 
     return NextResponse.json(producto, { status: 201 })
   } catch (error) {

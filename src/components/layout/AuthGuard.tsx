@@ -44,7 +44,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#853f9a] animate-pulse">
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#851919] animate-pulse">
             <Package size={28} className="text-white" />
           </div>
           <p className="text-sm text-gray-500">Verificando sesión...</p>

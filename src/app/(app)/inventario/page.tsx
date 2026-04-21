@@ -9,11 +9,12 @@ import { StatsInventario } from '@/components/inventario/StatsInventario'
 import { CardProducto } from '@/components/inventario/CardProducto'
 import { TablaProductos } from '@/components/inventario/TablaProductos'
 import { FormMovimiento } from '@/components/movimientos/FormMovimiento'
+import { VenderModal } from '@/components/ventas/VenderModal'
 import { Topbar } from '@/components/layout/Topbar'
 import { Button } from '@/components/ui/Button'
 import type { Producto, FiltrosInventario as FiltrosType } from '@/types/producto'
 
-type Accion = 'reservar' | 'vender' | 'devolver'
+type Accion = 'reservar' | 'devolver'
 
 function SkeletonCard() {
   return (
@@ -31,20 +32,22 @@ function SkeletonCard() {
 export default function InventarioPage() {
   const [filtros, setFiltros] = useState<FiltrosType>({})
   const [vista, setVista] = useState<'grid' | 'tabla'>('grid')
+
   const [productoSeleccionado, setProductoSeleccionado] = useState<Producto | null>(null)
   const [accion, setAccion] = useState<Accion | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
 
-  const { productos, isLoading, mutate } = useProductos(filtros)
+  const [productoParaVender, setProductoParaVender] = useState<Producto | null>(null)
+  const [venderModalOpen, setVenderModalOpen] = useState(false)
 
-  const stats = useMemo(() => {
-    return {
-      total: productos.length,
-      stock: productos.filter((p) => p.estado === 'stock').length,
-      reservado: productos.filter((p) => p.estado === 'reservado').length,
-      vendido: productos.filter((p) => p.estado === 'vendido').length,
-    }
-  }, [productos])
+  const { productos, total, hasMore, isLoading, isLoadingMore, mutate, loadMore } = useProductos(filtros)
+
+  const stats = useMemo(() => ({
+    total,
+    stock: productos.filter((p) => p.estado === 'stock').length,
+    reservado: productos.filter((p) => p.estado === 'reservado').length,
+    vendido: productos.filter((p) => p.estado === 'cobrado').length,
+  }), [productos, total])
 
   function abrirModal(producto: Producto, accionTipo: Accion) {
     setProductoSeleccionado(producto)
@@ -52,7 +55,29 @@ export default function InventarioPage() {
     setModalOpen(true)
   }
 
-  function handleSuccess() {
+  function abrirVenderModal(producto: Producto) {
+    setProductoParaVender(producto)
+    setVenderModalOpen(true)
+  }
+
+  function handleMovimientoSuccess() {
+    if (!productoSeleccionado || !accion) { mutate(); return }
+    const id = productoSeleccionado.id
+    mutate(
+      (pages) => pages?.map((page) => ({
+        ...page,
+        data: page.data.map((p) => {
+          if (p.id !== id) return p
+          if (accion === 'reservar') return { ...p, estado: 'reservado' as const }
+          if (accion === 'devolver') return { ...p, estado: 'stock' as const }
+          return p
+        }),
+      })),
+      { revalidate: true }
+    )
+  }
+
+  function handleVentaSuccess() {
     mutate()
   }
 
@@ -74,101 +99,99 @@ export default function InventarioPage() {
       <Topbar title="Inventario" />
 
       <div className="flex-1 overflow-y-auto p-6 space-y-5">
-        {/* Header actions */}
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-sm text-gray-500">
-              {isLoading ? 'Cargando...' : `${productos.length} productos encontrados`}
-            </h2>
-          </div>
+          <h2 className="text-sm text-gray-500">
+            {isLoading ? 'Cargando...' : `${total} productos encontrados`}
+          </h2>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleExportar}>
-              <Download size={15} />
-              Exportar Excel
+              <Download size={15} /> Exportar Excel
             </Button>
             <Button variant="outline" size="icon-sm" onClick={() => mutate()} title="Actualizar">
               <RefreshCw size={15} />
             </Button>
-            {/* Vista toggle */}
             <div className="flex items-center rounded-lg border border-gray-300 bg-white p-0.5">
-              <button
-                onClick={() => setVista('grid')}
-                className={`rounded-md px-2.5 py-1.5 transition-colors ${
-                  vista === 'grid' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
+              <button onClick={() => setVista('grid')} className={`rounded-md px-2.5 py-1.5 transition-colors ${vista === 'grid' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-700'}`}>
                 <LayoutGrid size={15} />
               </button>
-              <button
-                onClick={() => setVista('tabla')}
-                className={`rounded-md px-2.5 py-1.5 transition-colors ${
-                  vista === 'tabla' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
+              <button onClick={() => setVista('tabla')} className={`rounded-md px-2.5 py-1.5 transition-colors ${vista === 'tabla' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-700'}`}>
                 <List size={15} />
               </button>
             </div>
             <Link href="/productos/nuevo">
-              <Button size="sm">
-                <Plus size={16} />
-                Producto
-              </Button>
+              <Button size="sm"><Plus size={16} /> Producto</Button>
             </Link>
           </div>
         </div>
 
-        {/* Stats */}
         <StatsInventario stats={stats} />
-
-        {/* Filters */}
         <FiltrosInventario onFiltrosChange={setFiltros} />
 
-        {/* Content */}
         {isLoading ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <SkeletonCard key={i} />
-            ))}
+            {Array.from({ length: 10 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : productos.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white py-20 text-center">
             <p className="text-base font-medium text-gray-500">No se encontraron productos</p>
             <p className="mt-1 text-sm text-gray-400">
               Probá ajustando los filtros o{' '}
-              <Link href="/productos/nuevo" className="text-[#853f9a] hover:underline">
-                creá un producto nuevo
-              </Link>
+              <Link href="/productos/nuevo" className="text-[#851919] hover:underline">creá un producto nuevo</Link>
             </p>
           </div>
         ) : vista === 'grid' ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {productos.map((producto) => (
-              <CardProducto
-                key={producto.id}
-                producto={producto}
-                onReservar={(p) => abrirModal(p, 'reservar')}
-                onVender={(p) => abrirModal(p, 'vender')}
-                onDevolver={(p) => abrirModal(p, 'devolver')}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {productos.map((producto) => (
+                <CardProducto
+                  key={producto.id}
+                  producto={producto}
+                  onReservar={(p) => abrirModal(p, 'reservar')}
+                  onVender={abrirVenderModal}
+                  onDevolver={(p) => abrirModal(p, 'devolver')}
+                />
+              ))}
+            </div>
+            {hasMore && (
+              <div className="flex justify-center pt-2">
+                <Button variant="outline" size="sm" onClick={loadMore} isLoading={isLoadingMore}>
+                  Cargar más ({productos.length} de {total})
+                </Button>
+              </div>
+            )}
+          </>
         ) : (
-          <TablaProductos
-            productos={productos}
-            onReservar={(p) => abrirModal(p, 'reservar')}
-            onVender={(p) => abrirModal(p, 'vender')}
-            onDevolver={(p) => abrirModal(p, 'devolver')}
-          />
+          <>
+            <TablaProductos
+              productos={productos}
+              onReservar={(p) => abrirModal(p, 'reservar')}
+              onVender={abrirVenderModal}
+              onDevolver={(p) => abrirModal(p, 'devolver')}
+            />
+            {hasMore && (
+              <div className="flex justify-center pt-2">
+                <Button variant="outline" size="sm" onClick={loadMore} isLoading={isLoadingMore}>
+                  Cargar más ({productos.length} de {total})
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Movement modal */}
       <FormMovimiento
         producto={productoSeleccionado}
         accion={accion}
         open={modalOpen}
         onOpenChange={setModalOpen}
-        onSuccess={handleSuccess}
+        onSuccess={handleMovimientoSuccess}
+      />
+
+      <VenderModal
+        producto={productoParaVender}
+        open={venderModalOpen}
+        onOpenChange={setVenderModalOpen}
+        onSuccess={handleVentaSuccess}
       />
     </div>
   )

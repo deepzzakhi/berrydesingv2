@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-[#853f9a] text-white hover:bg-[#6d3380] focus-visible:ring-[#853f9a]',
+          'bg-[#851919] text-white hover:bg-[#6b1414] focus-visible:ring-[#851919]',
         outline:
           'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus-visible:ring-gray-400',
         ghost:
@@ -23,7 +23,7 @@ const buttonVariants = cva(
           'bg-amber-500 text-white hover:bg-amber-600 focus-visible:ring-amber-500',
         green:
           'bg-green-600 text-white hover:bg-green-700 focus-visible:ring-green-600',
-        link: 'text-[#853f9a] underline-offset-4 hover:underline p-0 h-auto',
+        link: 'text-[#851919] underline-offset-4 hover:underline p-0 h-auto',
       },
       size: {
         default: 'h-10 px-4 py-2',

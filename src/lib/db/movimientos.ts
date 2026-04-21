@@ -43,7 +43,7 @@ export async function registrarMovimiento(
   const { data, error } = await supabase.rpc('registrar_movimiento', {
     p_producto_id: input.producto_id,
     p_tipo_movimiento: input.tipo_movimiento,
-    p_cantidad_delta: input.cantidad_delta ?? 0,
+    p_cantidad_delta: input.cantidad_delta ?? (input.tipo_movimiento === 'confirmacion_venta' ? 1 : 0),
     p_orden_bondarea: input.orden_bondarea ?? null,
     p_cliente: input.cliente ?? null,
     p_usuario_id: user?.id ?? null,
@@ -77,12 +77,19 @@ export async function registrarMovimiento(
   return movimiento as Movimiento
 }
 
+export interface MovimientosPaginados {
+  data: Movimiento[]
+  total: number
+}
+
 export async function getMovimientosConFiltros(opts: {
   producto_id?: string
   tipo_movimiento?: string
   fecha_desde?: string
   fecha_hasta?: string
-}): Promise<Movimiento[]> {
+  limit?: number
+  offset?: number
+}): Promise<MovimientosPaginados> {
   const supabase = await createClient()
 
   let query = supabase
@@ -94,7 +101,8 @@ export async function getMovimientosConFiltros(opts: {
         *,
         tela:telas(*)
       )
-    `
+    `,
+      { count: 'exact' }
     )
     .order('created_at', { ascending: false })
 
@@ -111,15 +119,24 @@ export async function getMovimientosConFiltros(opts: {
   }
 
   if (opts.fecha_hasta) {
-    query = query.lte('created_at', opts.fecha_hasta)
+    const hasta = new Date(opts.fecha_hasta)
+    hasta.setHours(23, 59, 59, 999)
+    query = query.lte('created_at', hasta.toISOString())
   }
 
-  const { data, error } = await query
+  const limit = opts.limit ?? 100
+  const offset = opts.offset ?? 0
+  query = query.range(offset, offset + limit - 1)
+
+  const { data, count, error } = await query
 
   if (error) {
     console.error('Error al obtener movimientos:', error)
     throw new Error('No se pudieron obtener los movimientos')
   }
 
-  return (data ?? []) as Movimiento[]
+  return {
+    data: (data ?? []) as Movimiento[],
+    total: count ?? 0,
+  }
 }

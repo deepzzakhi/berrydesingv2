@@ -1,7 +1,13 @@
 import useSWR from 'swr'
 import type { Movimiento } from '@/types/producto'
 
-const fetcher = async (url: string): Promise<Movimiento[]> => {
+interface MovimientosPage {
+  data: Movimiento[]
+  total: number
+  hasMore: boolean
+}
+
+const fetcher = async (url: string): Promise<MovimientosPage> => {
   const res = await fetch(url)
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
@@ -10,19 +16,41 @@ const fetcher = async (url: string): Promise<Movimiento[]> => {
   return res.json()
 }
 
-export function useMovimientos(productoId?: string) {
+interface UseMovimientosOpts {
+  productoId?: string
+  tipoMovimiento?: string
+  fechaDesde?: string
+  fechaHasta?: string
+  limit?: number
+}
+
+export function useMovimientos(productoIdOrOpts?: string | UseMovimientosOpts) {
+  // Accept either legacy string arg (productoId) or options object
+  const opts: UseMovimientosOpts =
+    typeof productoIdOrOpts === 'string'
+      ? { productoId: productoIdOrOpts }
+      : (productoIdOrOpts ?? {})
+
   const params = new URLSearchParams()
-  if (productoId) params.set('producto_id', productoId)
+  params.set('limit', String(opts.limit ?? 100))
+  params.set('offset', '0')
+  if (opts.productoId) params.set('producto_id', opts.productoId)
+  if (opts.tipoMovimiento && opts.tipoMovimiento !== 'todos')
+    params.set('tipo_movimiento', opts.tipoMovimiento)
+  if (opts.fechaDesde) params.set('fecha_desde', opts.fechaDesde)
+  if (opts.fechaHasta) params.set('fecha_hasta', opts.fechaHasta)
 
-  const queryString = params.toString()
-  const url = `/api/movimientos${queryString ? `?${queryString}` : ''}`
+  const url = `/api/movimientos?${params}`
 
-  const { data, error, isLoading, mutate } = useSWR<Movimiento[]>(url, fetcher, {
-    revalidateOnFocus: true,
+  const { data, error, isLoading, mutate } = useSWR<MovimientosPage>(url, fetcher, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 30_000,
   })
 
   return {
-    movimientos: data ?? [],
+    movimientos: data?.data ?? [],
+    total: data?.total ?? 0,
     isLoading,
     error,
     mutate,

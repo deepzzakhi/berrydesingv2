@@ -7,15 +7,34 @@ export const tipoProductoEnum = z.enum([
   'alfombra_vinilica',
 ])
 
-export const estadoProductoEnum = z.enum(['stock', 'reservado', 'vendido'])
+export const estadoProductoEnum = z.enum(['stock', 'reservado', 'cobrado'])
 
 export const tipoMovimientoEnum = z.enum([
   'ingreso_stock',
   'reserva',
   'confirmacion_venta',
+  'confirmacion_pago',
   'devolucion_stock',
   'ajuste_cantidad',
 ])
+
+export const venderSchema = z.object({
+  producto_id: z.string().uuid('ID de producto inválido'),
+  cantidad: z
+    .number({ error: 'La cantidad debe ser un número' })
+    .int()
+    .positive('La cantidad debe ser al menos 1'),
+  monto: z
+    .number({ error: 'El monto debe ser un número' })
+    .positive('El monto debe ser mayor a 0')
+    .max(999999.99, 'El monto no puede superar $999,999.99'),
+  fecha_pago: z.string().min(1, 'La fecha de pago es obligatoria'),
+  cliente_nombre: z.string().min(1, 'El nombre del cliente es obligatorio').max(100),
+  cliente_apellido: z.string().min(1, 'El apellido del cliente es obligatorio').max(100),
+  cliente_dni: z.string().max(20).nullable().optional(),
+  cliente_email: z.string().email('Email inválido').nullable().optional().or(z.literal('')),
+  nota: z.string().max(500).nullable().optional(),
+})
 
 export const createTelaSchema = z.object({
   codigo: z
@@ -34,7 +53,7 @@ export const createProductoSchema = z.object({
   tipo: z.string().min(1, 'El tipo es obligatorio'),
   medida: z.string().nullable().optional(),
   cantidad: z
-    .number({ invalid_type_error: 'La cantidad debe ser un número' })
+    .number({ error: 'La cantidad debe ser un número' })
     .int('La cantidad debe ser un número entero')
     .min(0, 'La cantidad no puede ser negativa')
     .default(0),
@@ -47,7 +66,7 @@ export const registrarMovimientoSchema = z.object({
   producto_id: z.string().uuid('ID de producto inválido'),
   tipo_movimiento: tipoMovimientoEnum,
   cantidad_delta: z
-    .number({ invalid_type_error: 'La cantidad debe ser un número' })
+    .number({ error: 'La cantidad debe ser un número' })
     .int()
     .optional(),
   orden_bondarea: z.string().max(100).nullable().optional(),
@@ -64,4 +83,5 @@ export const filtrosInventarioSchema = z.object({
 export type CreateTelaInput = z.infer<typeof createTelaSchema>
 export type CreateProductoInput = z.infer<typeof createProductoSchema>
 export type RegistrarMovimientoInput = z.infer<typeof registrarMovimientoSchema>
+export type VenderInput = z.infer<typeof venderSchema>
 export type FiltrosInventarioInput = z.infer<typeof filtrosInventarioSchema>

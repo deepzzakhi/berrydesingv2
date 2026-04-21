@@ -5,8 +5,9 @@ import { z } from 'zod'
 
 const updateProductoSchema = z.object({
   cantidad: z.number().int().min(0).optional(),
-  estado: z.enum(['stock', 'reservado', 'vendido']).optional(),
+  estado: z.enum(['stock', 'reservado', 'cobrado']).optional(),
   medida: z.string().nullable().optional(),
+  precio_unitario: z.number().positive().nullable().optional(),
 })
 
 type RouteContext = { params: Promise<{ id: string }> }
@@ -52,7 +53,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.errors[0].message },
+        { error: parsed.error.issues[0]?.message ?? "Datos inválidos" },
         { status: 400 }
       )
     }

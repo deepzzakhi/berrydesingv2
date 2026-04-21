@@ -25,7 +25,7 @@ export function Topbar({ title }: TopbarProps) {
     <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6">
       {/* Page title */}
       <div className="flex items-center gap-3">
-        <div className="h-6 w-1 rounded-full bg-[#853f9a]" />
+        <div className="h-6 w-1 rounded-full bg-[#851919]" />
         <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
       </div>
 
@@ -38,7 +38,7 @@ export function Topbar({ title }: TopbarProps) {
 
         {/* User avatar */}
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#853f9a] text-sm font-semibold text-white">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#851919] text-sm font-semibold text-white">
             {initials}
           </div>
           <div className="hidden sm:block">

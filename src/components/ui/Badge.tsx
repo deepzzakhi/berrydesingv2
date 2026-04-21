@@ -31,7 +31,7 @@ interface BadgeProps {
 
 export function Badge({ children, variant = 'default', className }: BadgeProps) {
   const variantClasses = {
-    default: 'bg-purple-100 text-purple-800 border-purple-200',
+    default: 'bg-red-100 text-red-800 border-red-200',
     secondary: 'bg-gray-100 text-gray-700 border-gray-200',
     outline: 'bg-transparent text-gray-700 border-gray-300',
     destructive: 'bg-red-100 text-red-800 border-red-200',

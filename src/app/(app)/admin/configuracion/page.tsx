@@ -52,9 +52,9 @@ function TiposProductoSection() {
     <section className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <Package size={16} className="text-[#853f9a]" />
+          <Package size={16} className="text-[#851919]" />
           <h2 className="text-sm font-semibold text-gray-900">Tipos de producto</h2>
-          <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-[#853f9a]">
+          <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-[#851919]">
             {tipos.length}
           </span>
         </div>
@@ -86,7 +86,7 @@ function TiposProductoSection() {
                 type="checkbox"
                 checked={form.requiere_medida}
                 onChange={(e) => setForm({ ...form, requiere_medida: e.target.checked })}
-                className="rounded border-gray-300 text-[#853f9a]"
+                className="rounded border-gray-300 text-[#851919]"
               />
               Requiere medida
             </label>
@@ -176,9 +176,9 @@ function EstadosProductoSection() {
     <section className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
       <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <Tag size={16} className="text-[#853f9a]" />
+          <Tag size={16} className="text-[#851919]" />
           <h2 className="text-sm font-semibold text-gray-900">Estados de producto</h2>
-          <span className="rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-[#853f9a]">
+          <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-[#851919]">
             {estados.length}
           </span>
         </div>
@@ -219,7 +219,7 @@ function EstadosProductoSection() {
                 type="checkbox"
                 checked={form.es_terminal}
                 onChange={(e) => setForm({ ...form, es_terminal: e.target.checked })}
-                className="rounded border-gray-300 text-[#853f9a]"
+                className="rounded border-gray-300 text-[#851919]"
               />
               Estado terminal (sin más transiciones)
             </label>

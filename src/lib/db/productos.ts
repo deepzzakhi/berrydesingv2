@@ -7,7 +7,15 @@ import type {
   CreateProductoInput,
 } from '@/types/producto'
 
-export async function getProductos(filtros?: FiltrosInventario): Promise<Producto[]> {
+export interface ProductosPaginados {
+  data: Producto[]
+  total: number
+}
+
+export async function getProductos(
+  filtros?: FiltrosInventario,
+  paginacion?: { limit: number; offset: number }
+): Promise<ProductosPaginados> {
   const supabase = await createClient()
 
   let query = supabase
@@ -19,7 +27,8 @@ export async function getProductos(filtros?: FiltrosInventario): Promise<Product
         *,
         catalogo:catalogos(*)
       )
-    `
+    `,
+      { count: 'exact' }
     )
     .order('created_at', { ascending: false })
 
@@ -35,14 +44,22 @@ export async function getProductos(filtros?: FiltrosInventario): Promise<Product
     query = query.ilike('telas.codigo', `%${filtros.busqueda}%`)
   }
 
-  const { data, error } = await query
+  if (paginacion) {
+    const { limit, offset } = paginacion
+    query = query.range(offset, offset + limit - 1)
+  }
+
+  const { data, count, error } = await query
 
   if (error) {
     console.error('Error al obtener productos:', error)
     throw new Error('No se pudieron obtener los productos')
   }
 
-  return (data ?? []) as Producto[]
+  return {
+    data: (data ?? []) as Producto[],
+    total: count ?? 0,
+  }
 }
 
 export async function getProducto(id: string): Promise<Producto | null> {
@@ -242,7 +259,7 @@ export async function getStatsInventario(): Promise<StatsInventario> {
     stats.total++
     if (row.estado === 'stock') stats.stock++
     else if (row.estado === 'reservado') stats.reservado++
-    else if (row.estado === 'vendido') stats.vendido++
+    else if (row.estado === 'cobrado') stats.vendido++
   }
 
   return stats

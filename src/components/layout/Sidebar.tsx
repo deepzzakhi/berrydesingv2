@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Package, ArrowLeftRight, Upload, Users, LogOut, Settings } from 'lucide-react'
+import { Package, ArrowLeftRight, Upload, Users, LogOut, Settings, LayoutDashboard } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { useUsuarioActual } from '@/hooks/useUsuarioActual'
 
 const navItems = [
+  { label: 'Dashboard',    href: '/dashboard',   icon: LayoutDashboard, roles: ['admin','operador','consulta'] },
   { label: 'Inventario',   href: '/inventario',  icon: Package,        roles: ['admin','operador','consulta'] },
   { label: 'Movimientos',  href: '/movimientos', icon: ArrowLeftRight, roles: ['admin','operador','consulta'] },
   { label: 'Importar',     href: '/importar',    icon: Upload,         roles: ['admin','operador'] },
@@ -35,11 +36,11 @@ export function Sidebar() {
     <aside className="flex h-full w-60 flex-col border-r border-gray-200 bg-white">
       <div className="flex h-16 items-center px-5 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#853f9a]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#851919]">
             <Package size={16} className="text-white" />
           </div>
           <div>
-            <p className="text-sm font-bold text-[#853f9a] leading-tight">Berry Design</p>
+            <p className="text-sm font-bold text-[#851919] leading-tight">Berry Design</p>
             <p className="text-xs text-gray-400 leading-tight">Stock Manager</p>
           </div>
         </div>
@@ -57,13 +58,13 @@ export function Sidebar() {
                   className={cn(
                     'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
                     isActive
-                      ? 'bg-purple-50 text-[#853f9a]'
+                      ? 'bg-red-50 text-[#851919]'
                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                   )}
                 >
-                  <Icon size={18} className={cn('shrink-0', isActive ? 'text-[#853f9a]' : 'text-gray-400')} />
+                  <Icon size={18} className={cn('shrink-0', isActive ? 'text-[#851919]' : 'text-gray-400')} />
                   {item.label}
-                  {isActive && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#853f9a]" />}
+                  {isActive && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#851919]" />}
                 </Link>
               </li>
             )

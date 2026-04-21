@@ -17,8 +17,8 @@ export function StatsInventario({ stats }: StatsInventarioProps) {
       label: 'Total productos',
       value: stats.total,
       icon: Package,
-      iconBg: 'bg-purple-100',
-      iconColor: 'text-[#853f9a]',
+      iconBg: 'bg-red-100',
+      iconColor: 'text-[#851919]',
       valueColor: 'text-gray-900',
     },
     {
@@ -38,7 +38,7 @@ export function StatsInventario({ stats }: StatsInventarioProps) {
       valueColor: 'text-amber-700',
     },
     {
-      label: 'Vendidos',
+      label: 'Cobrados',
       value: stats.vendido,
       icon: Archive,
       iconBg: 'bg-gray-100',

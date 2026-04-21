@@ -1,6 +1,6 @@
 // ─── Enums / Literal Types ────────────────────────────────────────────────────
 
-export type EstadoProducto = 'stock' | 'reservado' | 'vendido'
+export type EstadoProducto = 'stock' | 'reservado' | 'cobrado'
 
 export type TipoProducto =
   | 'matera'
@@ -12,6 +12,7 @@ export type TipoMovimiento =
   | 'ingreso_stock'
   | 'reserva'
   | 'confirmacion_venta'
+  | 'confirmacion_pago'
   | 'devolucion_stock'
   | 'ajuste_cantidad'
 
@@ -46,6 +47,7 @@ export interface Producto {
   medida: string | null
   cantidad: number
   estado: EstadoProducto
+  precio_unitario: number | null
   created_at: string
   updated_at: string
 }
@@ -64,6 +66,27 @@ export interface Movimiento {
   usuario?: Usuario | null
   notas: string | null
   created_at: string
+}
+
+export interface Pago {
+  id: string
+  producto_id: string
+  producto?: Producto
+  tela_id: string
+  tipo_producto: TipoProducto
+  medida: string | null
+  cantidad: number
+  monto: number
+  fecha_pago: string
+  nota: string | null
+  cliente_nombre: string | null
+  cliente_apellido: string | null
+  cliente_dni: string | null
+  cliente_email: string | null
+  usuario_id: string | null
+  usuario?: Usuario | null
+  created_at: string
+  updated_at: string
 }
 
 export interface Usuario {
@@ -104,6 +127,18 @@ export interface RegistrarMovimientoInput {
   notas?: string | null
 }
 
+export interface VenderInput {
+  producto_id: string
+  cantidad: number
+  monto: number
+  fecha_pago: string
+  cliente_nombre: string
+  cliente_apellido: string
+  cliente_dni?: string | null
+  cliente_email?: string | null
+  nota?: string | null
+}
+
 export interface FiltrosInventario {
   busqueda?: string
   estado?: EstadoProducto | 'todos'
@@ -122,13 +157,14 @@ export const TIPO_LABELS: Record<TipoProducto, string> = {
 export const ESTADO_LABELS: Record<EstadoProducto, string> = {
   stock: 'En stock',
   reservado: 'Reservado',
-  vendido: 'Vendido',
+  cobrado: 'Cobrado',
 }
 
 export const MOVIMIENTO_LABELS: Record<TipoMovimiento, string> = {
   ingreso_stock: 'Ingreso a stock',
   reserva: 'Reserva',
   confirmacion_venta: 'Confirmación de venta',
+  confirmacion_pago: 'Confirmación de pago',
   devolucion_stock: 'Devolución a stock',
   ajuste_cantidad: 'Ajuste de cantidad',
 }
@@ -136,11 +172,11 @@ export const MOVIMIENTO_LABELS: Record<TipoMovimiento, string> = {
 export const ESTADO_COLORS: Record<EstadoProducto, string> = {
   stock: '#16a34a',
   reservado: '#ca8a04',
-  vendido: '#6b7280',
+  cobrado: '#6b7280',
 }
 
 export const ESTADO_BADGE_CLASSES: Record<EstadoProducto, string> = {
   stock: 'bg-green-100 text-green-800 border-green-200',
   reservado: 'bg-amber-100 text-amber-800 border-amber-200',
-  vendido: 'bg-gray-100 text-gray-600 border-gray-200',
+  cobrado: 'bg-gray-100 text-gray-600 border-gray-200',
 }

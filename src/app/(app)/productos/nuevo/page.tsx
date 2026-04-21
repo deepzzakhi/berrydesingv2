@@ -99,20 +99,20 @@ export default function NuevoProductoPage() {
           <div className="mb-8 flex items-center gap-3">
             <div
               className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
-                step >= 1 ? 'bg-[#853f9a] text-white' : 'bg-gray-200 text-gray-500'
+                step >= 1 ? 'bg-[#851919] text-white' : 'bg-gray-200 text-gray-500'
               }`}
             >
               {step > 1 ? <Check size={16} /> : '1'}
             </div>
             <div className="flex-1 h-0.5 bg-gray-200">
               <div
-                className="h-full bg-[#853f9a] transition-all"
+                className="h-full bg-[#851919] transition-all"
                 style={{ width: step >= 2 ? '100%' : '0%' }}
               />
             </div>
             <div
               className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
-                step >= 2 ? 'bg-[#853f9a] text-white' : 'bg-gray-200 text-gray-500'
+                step >= 2 ? 'bg-[#851919] text-white' : 'bg-gray-200 text-gray-500'
               }`}
             >
               2
@@ -204,7 +204,7 @@ export default function NuevoProductoPage() {
                     onChange={(e) => setObservaciones(e.target.value)}
                     rows={3}
                     placeholder="Notas sobre la tela o el producto..."
-                    className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#853f9a] focus:border-transparent resize-none transition-colors"
+                    className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#851919] focus:border-transparent resize-none transition-colors"
                   />
                 </div>
 

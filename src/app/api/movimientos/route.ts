@@ -13,16 +13,25 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
+    const limit = Math.min(Number(searchParams.get('limit') ?? 100), 500)
+    const offset = Math.max(Number(searchParams.get('offset') ?? 0), 0)
+
     const opts = {
       producto_id: searchParams.get('producto_id') ?? undefined,
       tipo_movimiento: searchParams.get('tipo_movimiento') ?? undefined,
       fecha_desde: searchParams.get('fecha_desde') ?? undefined,
       fecha_hasta: searchParams.get('fecha_hasta') ?? undefined,
+      limit,
+      offset,
     }
 
-    const movimientos = await getMovimientosConFiltros(opts)
+    const { data, total } = await getMovimientosConFiltros(opts)
 
-    return NextResponse.json(movimientos)
+    return NextResponse.json({
+      data,
+      total,
+      hasMore: offset + data.length < total,
+    })
   } catch (error) {
     console.error('[GET /api/movimientos]', error)
     return NextResponse.json(
@@ -46,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.errors[0].message },
+        { error: parsed.error.issues[0]?.message ?? "Datos inválidos" },
         { status: 400 }
       )
     }

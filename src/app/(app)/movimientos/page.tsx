@@ -25,17 +25,10 @@ export default function MovimientosPage() {
   const [fechaDesde, setFechaDesde] = useState('')
   const [fechaHasta, setFechaHasta] = useState('')
 
-  const { movimientos, isLoading, mutate } = useMovimientos()
-
-  const movimientosFiltrados = movimientos.filter((mov) => {
-    if (tipoFiltro !== 'todos' && mov.tipo_movimiento !== tipoFiltro) return false
-    if (fechaDesde && new Date(mov.created_at) < new Date(fechaDesde)) return false
-    if (fechaHasta) {
-      const hasta = new Date(fechaHasta)
-      hasta.setHours(23, 59, 59)
-      if (new Date(mov.created_at) > hasta) return false
-    }
-    return true
+  const { movimientos, total, isLoading, mutate } = useMovimientos({
+    tipoMovimiento: tipoFiltro,
+    fechaDesde: fechaDesde || undefined,
+    fechaHasta: fechaHasta || undefined,
   })
 
   return (
@@ -52,7 +45,7 @@ export default function MovimientosPage() {
               <select
                 value={tipoFiltro}
                 onChange={(e) => setTipoFiltro(e.target.value as TipoFiltro)}
-                className="flex h-9 appearance-none rounded-md border border-gray-300 bg-white px-3 pr-8 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#853f9a] focus:border-transparent"
+                className="flex h-9 appearance-none rounded-md border border-gray-300 bg-white px-3 pr-8 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#851919] focus:border-transparent"
               >
                 {TIPO_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -70,7 +63,7 @@ export default function MovimientosPage() {
               type="date"
               value={fechaDesde}
               onChange={(e) => setFechaDesde(e.target.value)}
-              className="flex h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#853f9a] focus:border-transparent"
+              className="flex h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#851919] focus:border-transparent"
             />
           </div>
 
@@ -81,7 +74,7 @@ export default function MovimientosPage() {
               type="date"
               value={fechaHasta}
               onChange={(e) => setFechaHasta(e.target.value)}
-              className="flex h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#853f9a] focus:border-transparent"
+              className="flex h-9 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#851919] focus:border-transparent"
             />
           </div>
 
@@ -107,9 +100,7 @@ export default function MovimientosPage() {
 
         {/* Results count */}
         <p className="text-sm text-gray-500">
-          {isLoading
-            ? 'Cargando...'
-            : `${movimientosFiltrados.length} movimientos`}
+          {isLoading ? 'Cargando...' : `${total} movimientos`}
         </p>
 
         {/* Timeline */}
@@ -120,7 +111,7 @@ export default function MovimientosPage() {
             ))}
           </div>
         ) : (
-          <HistorialTimeline movimientos={movimientosFiltrados} />
+          <HistorialTimeline movimientos={movimientos} />
         )}
       </div>
     </div>

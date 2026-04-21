@@ -8,7 +8,7 @@ import { BadgeEstado } from '@/components/ui/Badge'
 import type { Producto } from '@/types/producto'
 import { TIPO_LABELS } from '@/types/producto'
 
-type Accion = 'reservar' | 'vender' | 'devolver'
+type Accion = 'reservar' | 'devolver'
 
 interface FormMovimientoProps {
   producto: Producto | null
@@ -28,13 +28,6 @@ const ACCION_CONFIG: Record<
     tipoMovimiento: 'reserva',
     submitLabel: 'Confirmar reserva',
     submitVariant: 'amber',
-  },
-  vender: {
-    title: 'Confirmar venta',
-    description: 'Registrá la confirmación de venta del producto.',
-    tipoMovimiento: 'confirmacion_venta',
-    submitLabel: 'Confirmar venta',
-    submitVariant: 'green',
   },
   devolver: {
     title: 'Devolver a stock',
@@ -61,7 +54,7 @@ export function FormMovimiento({
   if (!producto || !accion) return null
 
   const config = ACCION_CONFIG[accion]
-  const necesitaCliente = accion === 'reservar' || accion === 'vender'
+  const necesitaCliente = accion === 'reservar'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -151,7 +144,7 @@ export function FormMovimiento({
           />
         )}
 
-        {(accion === 'reservar' || accion === 'vender') && (
+        {accion === 'reservar' && (
           <Input
             label="Orden Bondarea (opcional)"
             value={ordenBondarea}
@@ -169,7 +162,7 @@ export function FormMovimiento({
             placeholder="Notas adicionales..."
             rows={3}
             disabled={isLoading}
-            className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#853f9a] focus:border-transparent disabled:cursor-not-allowed disabled:bg-gray-50 transition-colors resize-none"
+            className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#851919] focus:border-transparent disabled:cursor-not-allowed disabled:bg-gray-50 transition-colors resize-none"
           />
         </div>
 
