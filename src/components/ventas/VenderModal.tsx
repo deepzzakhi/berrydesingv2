@@ -57,6 +57,7 @@ export function VenderModal({ producto, open, onOpenChange, onSuccess }: VenderM
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!producto) return
     setError(null)
 
     if (!nombre.trim()) { setError('El nombre del cliente es obligatorio'); return }
