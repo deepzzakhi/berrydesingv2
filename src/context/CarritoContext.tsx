@@ -6,12 +6,13 @@ import type { Producto } from '@/types/producto'
 export interface CarritoItem {
   producto: Producto
   cantidad: number
+  monto: number
 }
 
 interface CarritoContextType {
   items: CarritoItem[]
   panelAbierto: boolean
-  agregar: (producto: Producto, cantidad: number) => void
+  agregar: (producto: Producto, cantidad: number, monto: number) => void
   quitar: (productoId: string) => void
   limpiar: () => void
   abrirPanel: () => void
@@ -25,17 +26,17 @@ export function CarritoProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CarritoItem[]>([])
   const [panelAbierto, setPanelAbierto] = useState(false)
 
-  const agregar = useCallback((producto: Producto, cantidad: number) => {
+  const agregar = useCallback((producto: Producto, cantidad: number, monto: number) => {
     setItems((prev) => {
       const existe = prev.find((i) => i.producto.id === producto.id)
       if (existe) {
         return prev.map((i) =>
           i.producto.id === producto.id
-            ? { ...i, cantidad: Math.min(i.cantidad + cantidad, producto.cantidad) }
+            ? { ...i, cantidad: Math.min(i.cantidad + cantidad, producto.cantidad), monto }
             : i
         )
       }
-      return [...prev, { producto, cantidad }]
+      return [...prev, { producto, cantidad, monto }]
     })
   }, [])
 

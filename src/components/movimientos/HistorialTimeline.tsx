@@ -13,17 +13,21 @@ import {
   User,
   FileText,
   Hash,
+  CreditCard,
+  ChevronRight,
 } from 'lucide-react'
 
 interface HistorialTimelineProps {
   movimientos: Movimiento[]
   className?: string
+  onClickMovimiento?: (mov: Movimiento) => void
 }
 
 const MOVIMIENTO_ICON: Record<string, React.ElementType> = {
   ingreso_stock: ArrowDownCircle,
   reserva: Clock,
   confirmacion_venta: CheckCircle,
+  confirmacion_pago: CreditCard,
   devolucion_stock: RotateCcw,
   ajuste_cantidad: SlidersHorizontal,
 }
@@ -32,11 +36,12 @@ const MOVIMIENTO_ICON_COLOR: Record<string, string> = {
   ingreso_stock: 'text-blue-600 bg-blue-50 border-blue-200',
   reserva: 'text-amber-600 bg-amber-50 border-amber-200',
   confirmacion_venta: 'text-green-600 bg-green-50 border-green-200',
+  confirmacion_pago: 'text-purple-600 bg-purple-50 border-purple-200',
   devolucion_stock: 'text-red-700 bg-red-50 border-red-200',
   ajuste_cantidad: 'text-gray-600 bg-gray-50 border-gray-200',
 }
 
-export function HistorialTimeline({ movimientos, className }: HistorialTimelineProps) {
+export function HistorialTimeline({ movimientos, className, onClickMovimiento }: HistorialTimelineProps) {
   if (movimientos.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -50,36 +55,30 @@ export function HistorialTimeline({ movimientos, className }: HistorialTimelineP
   return (
     <div className={className}>
       <ol className="relative border-l border-gray-200 space-y-0">
-        {movimientos.map((mov, idx) => {
+        {movimientos.map((mov) => {
           const Icon = MOVIMIENTO_ICON[mov.tipo_movimiento] ?? Clock
-          const iconClasses =
-            MOVIMIENTO_ICON_COLOR[mov.tipo_movimiento] ??
-            'text-gray-500 bg-gray-50 border-gray-200'
-          const isLast = idx === movimientos.length - 1
+          const iconClasses = MOVIMIENTO_ICON_COLOR[mov.tipo_movimiento] ?? 'text-gray-500 bg-gray-50 border-gray-200'
+          const esVenta = mov.tipo_movimiento === 'confirmacion_pago'
+          const clickable = esVenta && !!onClickMovimiento
 
           return (
             <li key={mov.id} className="relative pb-6 pl-8">
-              {/* Timeline dot */}
-              <div
-                className={`absolute -left-3.5 flex h-7 w-7 items-center justify-center rounded-full border-2 ${iconClasses}`}
-              >
+              <div className={`absolute -left-3.5 flex h-7 w-7 items-center justify-center rounded-full border-2 ${iconClasses}`}>
                 <Icon size={14} />
               </div>
 
-              {/* Content card */}
               <div
-                className={`rounded-lg border border-gray-200 bg-white p-4 shadow-sm ${
-                  !isLast ? '' : ''
+                className={`rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow ${
+                  clickable ? 'cursor-pointer hover:shadow-md hover:border-purple-200' : ''
                 }`}
+                onClick={clickable ? () => onClickMovimiento(mov) : undefined}
               >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
                     <p className="text-sm font-semibold text-gray-900">
                       {MOVIMIENTO_LABELS[mov.tipo_movimiento] ?? mov.tipo_movimiento}
                     </p>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {formatDatetime(mov.created_at)}
-                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">{formatDatetime(mov.created_at)}</p>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -90,10 +89,10 @@ export function HistorialTimeline({ movimientos, className }: HistorialTimelineP
                       </>
                     )}
                     <BadgeEstado estado={mov.estado_nuevo} />
+                    {clickable && <ChevronRight size={14} className="text-gray-400" />}
                   </div>
                 </div>
 
-                {/* Details */}
                 <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
                   {mov.cliente && (
                     <div className="flex items-center gap-1.5 text-xs text-gray-600">
@@ -108,16 +107,14 @@ export function HistorialTimeline({ movimientos, className }: HistorialTimelineP
                     </div>
                   )}
                   {mov.cantidad_delta !== 0 && (
-                    <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                      <span
-                        className={
-                          mov.cantidad_delta > 0 ? 'text-green-600' : 'text-red-600'
-                        }
-                      >
-                        {mov.cantidad_delta > 0 ? '+' : ''}
-                        {mov.cantidad_delta} unidades
+                    <div className="flex items-center gap-1.5 text-xs">
+                      <span className={mov.cantidad_delta > 0 ? 'text-green-600' : 'text-red-600'}>
+                        {mov.cantidad_delta > 0 ? '+' : ''}{mov.cantidad_delta} unidades
                       </span>
                     </div>
+                  )}
+                  {esVenta && (
+                    <span className="text-xs text-purple-600 font-medium">Ver detalle →</span>
                   )}
                 </div>
 

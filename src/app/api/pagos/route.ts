@@ -105,7 +105,8 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (pagoError) {
-    return NextResponse.json({ error: pagoError.message ?? 'No se pudo registrar la venta' }, { status: 500 })
+    console.error('[POST /api/pagos] pagoError:', JSON.stringify(pagoError))
+    return NextResponse.json({ error: pagoError.message ?? 'No se pudo registrar la venta', detail: pagoError }, { status: 500 })
   }
 
   // Decrement stock; move to cobrado when empty

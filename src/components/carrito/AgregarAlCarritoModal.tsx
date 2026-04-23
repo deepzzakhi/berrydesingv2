@@ -21,15 +21,16 @@ export function AgregarAlCarritoModal({
 }: AgregarAlCarritoModalProps) {
   const { agregar, abrirPanel } = useCarrito()
   const [cantidad, setCantidad] = useState(1)
+  const [monto, setMonto] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  // Reset on open
   useEffect(() => {
     if (open) {
       setCantidad(1)
+      setMonto(producto?.precio_unitario ? String(producto.precio_unitario) : '')
       setError(null)
     }
-  }, [open])
+  }, [open, producto])
 
   if (!producto) return null
 
@@ -44,11 +45,13 @@ export function AgregarAlCarritoModal({
 
   function handleAgregar() {
     if (cantidad < 1) { setError('La cantidad debe ser al menos 1'); return }
-    if (cantidad > maxCantidad) {
-      setError(`Stock disponible: ${maxCantidad}`)
+    if (cantidad > maxCantidad) { setError(`Stock disponible: ${maxCantidad}`); return }
+    const montoNum = parseFloat(monto)
+    if (!monto || isNaN(montoNum) || montoNum <= 0) {
+      setError('Ingresá un monto válido mayor a 0')
       return
     }
-    agregar(producto!, cantidad)
+    agregar(producto!, cantidad, montoNum)
     onOpenChange(false)
     abrirPanel()
   }
@@ -57,29 +60,24 @@ export function AgregarAlCarritoModal({
     <Modal
       open={open}
       onOpenChange={onOpenChange}
-      title="Agregar a venta"
-      description="Ingresá la cantidad a vender. El stock se descuenta al confirmar."
+      title="Agregar al carrito"
+      description="Ingresá la cantidad y el precio. Los datos del cliente se piden al finalizar."
       size="sm"
     >
-      {/* Producto info */}
       <div className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-0.5">
-        <p className="text-sm font-semibold text-gray-900">
-          {producto.tela?.codigo ?? '-'}
-        </p>
+        <p className="text-sm font-semibold text-gray-900">{producto.tela?.codigo ?? '-'}</p>
         <p className="text-xs text-gray-500">{TIPO_LABELS[producto.tipo]}</p>
-        {producto.medida && (
-          <p className="text-xs text-gray-400">Medida: {producto.medida}</p>
-        )}
+        {producto.medida && <p className="text-xs text-gray-400">Medida: {producto.medida}</p>}
         <p className="text-xs text-gray-400">
-          Stock disponible:{' '}
-          <span className="font-semibold text-gray-700">{maxCantidad}</span>
+          Stock disponible: <span className="font-semibold text-gray-700">{maxCantidad}</span>
         </p>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
+        {/* Cantidad */}
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-gray-700">
-            Cantidad a vender <span className="text-red-500">*</span>
+            Cantidad <span className="text-red-500">*</span>
           </label>
           <div className="flex items-center gap-2">
             <button
@@ -95,7 +93,7 @@ export function AgregarAlCarritoModal({
               max={maxCantidad}
               value={cantidad}
               onChange={(e) => handleCantidadChange(e.target.value)}
-              className="flex h-10 w-20 rounded-md border border-gray-300 bg-white px-3 py-2 text-center text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#851919] focus:border-transparent"
+              className="flex h-10 w-20 rounded-md border border-gray-300 bg-white px-3 py-2 text-center text-sm font-semibold text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#851919]"
             />
             <button
               type="button"
@@ -105,16 +103,31 @@ export function AgregarAlCarritoModal({
               +
             </button>
           </div>
-          {error && <p className="text-xs text-red-600">{error}</p>}
         </div>
 
+        {/* Monto */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-gray-700">
+            Precio total <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">$</span>
+            <input
+              type="number"
+              min={0.01}
+              step={0.01}
+              value={monto}
+              onChange={(e) => { setError(null); setMonto(e.target.value) }}
+              placeholder="0.00"
+              className="w-full h-10 rounded-md border border-gray-300 bg-white pl-7 pr-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#851919]"
+            />
+          </div>
+        </div>
+
+        {error && <p className="text-xs text-red-600">{error}</p>}
+
         <div className="flex gap-2 pt-1">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
+          <Button type="button" variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
           <Button

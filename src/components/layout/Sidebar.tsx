@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Package, ArrowLeftRight, Upload, Users, LogOut, Settings, LayoutDashboard } from 'lucide-react'
+import { Package, ArrowLeftRight, Upload, Users, LogOut, Settings, LayoutDashboard, UserCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { useUsuarioActual } from '@/hooks/useUsuarioActual'
@@ -12,6 +12,7 @@ const navItems = [
   { label: 'Inventario',   href: '/inventario',  icon: Package,        roles: ['admin','operador','consulta'] },
   { label: 'Movimientos',  href: '/movimientos', icon: ArrowLeftRight, roles: ['admin','operador','consulta'] },
   { label: 'Importar',     href: '/importar',    icon: Upload,         roles: ['admin','operador'] },
+  { label: 'Clientes',     href: '/clientes',    icon: UserCheck,      roles: ['admin','operador'] },
   { label: 'Usuarios',     href: '/admin/usuarios',     icon: Users,   roles: ['admin'] },
   { label: 'Configuración',href: '/admin/configuracion',icon: Settings, roles: ['admin'] },
 ] as const

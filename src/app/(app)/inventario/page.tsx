@@ -9,7 +9,7 @@ import { StatsInventario } from '@/components/inventario/StatsInventario'
 import { CardProducto } from '@/components/inventario/CardProducto'
 import { TablaProductos } from '@/components/inventario/TablaProductos'
 import { FormMovimiento } from '@/components/movimientos/FormMovimiento'
-import { VenderModal } from '@/components/ventas/VenderModal'
+import { AgregarAlCarritoModal } from '@/components/carrito/AgregarAlCarritoModal'
 import { Topbar } from '@/components/layout/Topbar'
 import { Button } from '@/components/ui/Button'
 import type { Producto, FiltrosInventario as FiltrosType } from '@/types/producto'
@@ -37,8 +37,8 @@ export default function InventarioPage() {
   const [accion, setAccion] = useState<Accion | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
 
-  const [productoParaVender, setProductoParaVender] = useState<Producto | null>(null)
-  const [venderModalOpen, setVenderModalOpen] = useState(false)
+  const [productoParaCarrito, setProductoParaCarrito] = useState<Producto | null>(null)
+  const [carritoModalOpen, setCarritoModalOpen] = useState(false)
 
   const { productos, total, hasMore, isLoading, isLoadingMore, mutate, loadMore } = useProductos(filtros)
 
@@ -55,9 +55,9 @@ export default function InventarioPage() {
     setModalOpen(true)
   }
 
-  function abrirVenderModal(producto: Producto) {
-    setProductoParaVender(producto)
-    setVenderModalOpen(true)
+  function abrirCarritoModal(producto: Producto) {
+    setProductoParaCarrito(producto)
+    setCarritoModalOpen(true)
   }
 
   function handleMovimientoSuccess() {
@@ -75,10 +75,6 @@ export default function InventarioPage() {
       })),
       { revalidate: true }
     )
-  }
-
-  function handleVentaSuccess() {
-    mutate()
   }
 
   async function handleExportar() {
@@ -147,7 +143,7 @@ export default function InventarioPage() {
                   key={producto.id}
                   producto={producto}
                   onReservar={(p) => abrirModal(p, 'reservar')}
-                  onVender={abrirVenderModal}
+                  onVender={abrirCarritoModal}
                   onDevolver={(p) => abrirModal(p, 'devolver')}
                 />
               ))}
@@ -165,7 +161,7 @@ export default function InventarioPage() {
             <TablaProductos
               productos={productos}
               onReservar={(p) => abrirModal(p, 'reservar')}
-              onVender={abrirVenderModal}
+              onVender={abrirCarritoModal}
               onDevolver={(p) => abrirModal(p, 'devolver')}
             />
             {hasMore && (
@@ -187,11 +183,10 @@ export default function InventarioPage() {
         onSuccess={handleMovimientoSuccess}
       />
 
-      <VenderModal
-        producto={productoParaVender}
-        open={venderModalOpen}
-        onOpenChange={setVenderModalOpen}
-        onSuccess={handleVentaSuccess}
+      <AgregarAlCarritoModal
+        producto={productoParaCarrito}
+        open={carritoModalOpen}
+        onOpenChange={setCarritoModalOpen}
       />
     </div>
   )

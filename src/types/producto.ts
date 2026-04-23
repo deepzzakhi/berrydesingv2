@@ -83,8 +83,25 @@ export interface Pago {
   cliente_apellido: string | null
   cliente_dni: string | null
   cliente_email: string | null
+  cliente_telefono: string | null
+  cliente_direccion: string | null
+  metodo_pago: string | null
+  cliente_id: string | null
   usuario_id: string | null
   usuario?: Usuario | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Cliente {
+  id: string
+  nombre: string
+  apellido: string
+  telefono: string | null
+  direccion: string | null
+  email: string | null
+  dni: string | null
+  notas: string | null
   created_at: string
   updated_at: string
 }

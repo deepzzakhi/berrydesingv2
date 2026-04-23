@@ -2,30 +2,34 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 
-const confirmarCarritoSchema = z.object({
+const schema = z.object({
   items: z
     .array(
       z.object({
         producto_id: z.string().uuid(),
         cantidad: z.number().int().positive(),
+        monto: z.number().positive(),
       })
     )
     .min(1, 'El carrito está vacío'),
+  cliente: z.object({
+    nombre: z.string().min(1),
+    apellido: z.string().min(1),
+    telefono: z.string().min(1),
+    direccion: z.string().min(1),
+    metodo_pago: z.enum(['efectivo', 'transferencia', 'tarjeta']),
+  }),
   notas: z.string().max(500).nullable().optional(),
 })
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
-  }
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
   const body = await request.json()
-  const parsed = confirmarCarritoSchema.safeParse(body)
+  const parsed = schema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? 'Datos inválidos' },
@@ -33,14 +37,13 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const { items, notas } = parsed.data
+  const { items, cliente, notas } = parsed.data
   const resultados: { producto_id: string; ok: boolean; error?: string }[] = []
 
   for (const item of items) {
-    // Fetch current stock
     const { data: producto, error: fetchError } = await supabase
       .from('productos')
-      .select('id, cantidad, estado')
+      .select('id, cantidad, estado, tela_id, tipo, medida')
       .eq('id', item.producto_id)
       .single()
 
@@ -49,11 +52,11 @@ export async function POST(request: NextRequest) {
       continue
     }
 
-    if (producto.estado !== 'stock') {
+    if (!['stock', 'reservado'].includes(producto.estado)) {
       resultados.push({
         producto_id: item.producto_id,
         ok: false,
-        error: `El producto no está en stock (estado: ${producto.estado})`,
+        error: `El producto no está disponible (estado: ${producto.estado})`,
       })
       continue
     }
@@ -68,14 +71,12 @@ export async function POST(request: NextRequest) {
     }
 
     const nuevaCantidad = producto.cantidad - item.cantidad
+    const nuevoEstado = nuevaCantidad <= 0 ? 'cobrado' : producto.estado
 
     // Decrement stock
     const { error: updateError } = await supabase
       .from('productos')
-      .update({
-        cantidad: nuevaCantidad,
-        updated_at: new Date().toISOString(),
-      })
+      .update({ cantidad: nuevaCantidad, estado: nuevoEstado, updated_at: new Date().toISOString() })
       .eq('id', item.producto_id)
 
     if (updateError) {
@@ -83,12 +84,30 @@ export async function POST(request: NextRequest) {
       continue
     }
 
+    // Create pago record
+    await supabase.from('pagos').insert({
+      producto_id: item.producto_id,
+      tela_id: producto.tela_id,
+      tipo_producto: producto.tipo,
+      medida: producto.medida ?? null,
+      cantidad: item.cantidad,
+      monto: item.monto,
+      fecha_pago: new Date().toISOString(),
+      cliente_nombre: cliente.nombre,
+      cliente_apellido: cliente.apellido,
+      cliente_telefono: cliente.telefono,
+      cliente_direccion: cliente.direccion,
+      metodo_pago: cliente.metodo_pago,
+      nota: notas ?? null,
+      usuario_id: user.id,
+    })
+
     // Register movimiento
     await supabase.from('movimientos').insert({
       producto_id: item.producto_id,
-      tipo_movimiento: 'confirmacion_venta',
+      tipo_movimiento: 'confirmacion_pago',
       estado_anterior: producto.estado,
-      estado_nuevo: producto.estado,
+      estado_nuevo: nuevoEstado,
       cantidad_delta: item.cantidad,
       usuario_id: user.id,
       notas: notas ?? null,
