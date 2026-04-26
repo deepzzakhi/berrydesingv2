@@ -193,9 +193,14 @@ export default function ProductoDetailPage() {
                   </Button>
                 </>
               )}
-              {producto.estado === 'cobrado' && (
+              {producto.estado === 'cobrado' && producto.cantidad > 0 && (
+                <Button variant="green" className="flex-1" onClick={() => setVenderModalOpen(true)}>
+                  Vender
+                </Button>
+              )}
+              {producto.estado === 'cobrado' && producto.cantidad === 0 && (
                 <div className="flex-1 flex items-center justify-center rounded-md border border-gray-200 bg-gray-50 py-2 text-sm text-gray-500">
-                  Cobrado
+                  Sin stock
                 </div>
               )}
             </div>

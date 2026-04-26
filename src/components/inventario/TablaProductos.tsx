@@ -59,7 +59,7 @@ function TablaProductosBase({ productos, onReservar, onVender, onDevolver }: Tab
                 <td className="px-4 py-3 text-sm text-gray-600">{TIPO_LABELS[producto.tipo]}</td>
                 <td className="px-4 py-3 text-sm text-gray-500">{producto.medida ?? '-'}</td>
                 <td className="px-4 py-3 text-center">
-                  <span className={producto.cantidad > 0 ? 'font-semibold text-gray-900' : 'font-semibold text-red-500'}>
+                  <span className={producto.cantidad > 0 ? 'font-semibold text-gray-900' : 'font-semibold text-gray-400'}>
                     {producto.cantidad}
                   </span>
                 </td>
@@ -84,8 +84,11 @@ function TablaProductosBase({ productos, onReservar, onVender, onDevolver }: Tab
                         <Button size="sm" variant="outline" className="text-xs px-2 whitespace-nowrap" onClick={() => onDevolver?.(producto)}>Devolver</Button>
                       </>
                     )}
-                    {producto.estado === 'cobrado' && (
-                      <span className="text-xs text-gray-400 px-2">Cobrado</span>
+                    {producto.estado === 'cobrado' && producto.cantidad > 0 && (
+                      <Button size="sm" variant="green" className="text-xs px-2 whitespace-nowrap" onClick={() => onVender?.(producto)}>Vender</Button>
+                    )}
+                    {producto.estado === 'cobrado' && producto.cantidad === 0 && (
+                      <span className="text-xs text-gray-400 px-2">Sin stock</span>
                     )}
                   </div>
                 </td>

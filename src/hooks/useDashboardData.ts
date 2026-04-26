@@ -43,8 +43,10 @@ export interface UltimoPago {
   tipo: string
   tipo_label: string
   medida: string | null
+  cantidad: number
   monto: number
   nota: string | null
+  cliente: string | null
   usuario: string
 }
 

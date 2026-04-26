@@ -44,21 +44,12 @@ export function UltimosPagosTable({ data, isLoading }: Props) {
           <table className="min-w-full divide-y divide-gray-100">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Fecha
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Código
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Tipo
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Monto
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Nota
-                </th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Fecha</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Código</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Tipo</th>
+                <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">Cant.</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Cliente</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Monto</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -75,11 +66,14 @@ export function UltimosPagosTable({ data, isLoading }: Props) {
                       {pago.tipo_label}
                     </span>
                   </td>
+                  <td className="px-4 py-3 text-center text-sm font-semibold text-gray-900">
+                    {pago.cantidad}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-gray-600 max-w-[140px] truncate">
+                    {pago.cliente ?? <span className="text-gray-400">-</span>}
+                  </td>
                   <td className="px-4 py-3 text-right text-sm font-semibold text-green-700">
                     {formatARS(pago.monto)}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-gray-500 max-w-[160px] truncate">
-                    {pago.nota ?? '-'}
                   </td>
                 </tr>
               ))}

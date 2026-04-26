@@ -63,8 +63,10 @@ function CardProductoBase({ producto, onReservar, onVender, onDevolver }: CardPr
 
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-gray-400">Cantidad</p>
-            <p className={cn('text-lg font-bold leading-tight', producto.cantidad > 0 ? 'text-gray-900' : 'text-red-500')}>
+            <p className="text-xs text-gray-400">
+              {producto.estado === 'cobrado' ? 'Sin stock' : 'Cantidad'}
+            </p>
+            <p className={cn('text-lg font-bold leading-tight', producto.cantidad > 0 ? 'text-gray-900' : 'text-gray-400')}>
               {producto.cantidad}
             </p>
           </div>
@@ -99,9 +101,14 @@ function CardProductoBase({ producto, onReservar, onVender, onDevolver }: CardPr
               </Button>
             </>
           )}
-          {producto.estado === 'cobrado' && (
+          {producto.estado === 'cobrado' && producto.cantidad > 0 && (
+            <Button size="sm" variant="green" className="flex-1 text-xs" onClick={() => onVender?.(producto)}>
+              Vender
+            </Button>
+          )}
+          {producto.estado === 'cobrado' && producto.cantidad === 0 && (
             <div className="flex-1 flex items-center justify-center rounded-md border border-gray-200 bg-gray-50 py-1.5 text-xs text-gray-500">
-              Cobrado
+              Sin stock
             </div>
           )}
         </div>

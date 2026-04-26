@@ -16,10 +16,13 @@ export async function GET(request: NextRequest) {
     .select(`
       id,
       monto,
+      cantidad,
       fecha_pago,
       nota,
       tipo_producto,
       medida,
+      cliente_nombre,
+      cliente_apellido,
       producto:productos(tela:telas(codigo)),
       usuario:usuarios(nombre, email)
     `)
@@ -46,8 +49,10 @@ export async function GET(request: NextRequest) {
     tipo: p.tipo_producto,
     tipo_label: TIPO_LABELS[p.tipo_producto as TipoProducto] ?? p.tipo_producto,
     medida: p.medida,
+    cantidad: Number(p.cantidad ?? 1),
     monto: Number(p.monto),
     nota: p.nota,
+    cliente: p.cliente_nombre ? `${p.cliente_nombre} ${p.cliente_apellido ?? ''}`.trim() : null,
     usuario: p.usuario?.nombre ?? p.usuario?.email ?? 'Sistema',
   }))
 
