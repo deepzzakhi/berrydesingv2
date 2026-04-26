@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
@@ -107,6 +108,12 @@ export default function LoginPage() {
             >
               Iniciar sesión
             </Button>
+
+            <p className="text-center text-sm text-gray-500">
+              <Link href="/forgot-password" className="font-medium text-[#851919] hover:underline">
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </p>
           </form>
         </div>
 
