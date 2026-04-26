@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react'
 import { Topbar } from '@/components/layout/Topbar'
 import { createClient } from '@/lib/supabase/client'
-import { BadgeEstado } from '@/components/ui/Badge'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Modal } from '@/components/ui/Modal'
 import type { Usuario, RolUsuario } from '@/types/producto'
 import { formatDate } from '@/lib/utils'
-import { Users, RefreshCw, ShieldCheck, Eye, Edit } from 'lucide-react'
+import { Users, RefreshCw, ShieldCheck, Edit, AlertCircle, CheckCircle } from 'lucide-react'
 
 const ROL_LABELS: Record<RolUsuario, string> = {
   admin: 'Administrador',
@@ -22,12 +23,24 @@ const ROL_BADGE_CLASS: Record<RolUsuario, string> = {
   consulta: 'bg-gray-100 text-gray-600 border-gray-200',
 }
 
+interface EditForm {
+  nombre: string
+  email: string
+  password: string
+  confirmPassword: string
+}
+
 export default function UsuariosPage() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [editingId, setEditingId] = useState<string | null>(null)
   const [savingId, setSavingId] = useState<string | null>(null)
+
+  const [editingUser, setEditingUser] = useState<Usuario | null>(null)
+  const [form, setForm] = useState<EditForm>({ nombre: '', email: '', password: '', confirmPassword: '' })
+  const [formError, setFormError] = useState<string | null>(null)
+  const [formSuccess, setFormSuccess] = useState(false)
+  const [isSavingForm, setIsSavingForm] = useState(false)
 
   async function fetchUsuarios() {
     setIsLoading(true)
@@ -41,19 +54,16 @@ export default function UsuariosPage() {
 
       if (dbErr) throw dbErr
       setUsuarios(data ?? [])
-    } catch (err) {
+    } catch {
       setError('No se pudieron cargar los usuarios')
-      console.error(err)
     } finally {
       setIsLoading(false)
     }
   }
 
-  useEffect(() => {
-    fetchUsuarios()
-  }, [])
+  useEffect(() => { fetchUsuarios() }, [])
 
-  async function updateUsuario(id: string, updates: Partial<Pick<Usuario, 'rol' | 'activo'>>) {
+  async function updateRolActivo(id: string, updates: Partial<Pick<Usuario, 'rol' | 'activo'>>) {
     setSavingId(id)
     try {
       const supabase = createClient()
@@ -63,15 +73,69 @@ export default function UsuariosPage() {
         .eq('id', id)
 
       if (dbErr) throw dbErr
-      setUsuarios((prev) =>
-        prev.map((u) => (u.id === id ? { ...u, ...updates } : u))
-      )
-    } catch (err) {
-      console.error(err)
+      setUsuarios((prev) => prev.map((u) => (u.id === id ? { ...u, ...updates } : u)))
+    } catch {
       alert('Error al actualizar el usuario')
     } finally {
       setSavingId(null)
-      setEditingId(null)
+    }
+  }
+
+  function openEditModal(usuario: Usuario) {
+    setEditingUser(usuario)
+    setForm({ nombre: usuario.nombre ?? '', email: usuario.email, password: '', confirmPassword: '' })
+    setFormError(null)
+    setFormSuccess(false)
+  }
+
+  async function handleSaveForm(e: React.FormEvent) {
+    e.preventDefault()
+    setFormError(null)
+
+    if (form.password && form.password.length < 6) {
+      setFormError('La contraseña debe tener al menos 6 caracteres.')
+      return
+    }
+    if (form.password && form.password !== form.confirmPassword) {
+      setFormError('Las contraseñas no coinciden.')
+      return
+    }
+
+    const body: Record<string, string> = {}
+    if (form.nombre !== (editingUser?.nombre ?? '')) body.nombre = form.nombre
+    if (form.email !== editingUser?.email) body.email = form.email
+    if (form.password) body.password = form.password
+
+    if (Object.keys(body).length === 0) {
+      setFormError('No hay cambios para guardar.')
+      return
+    }
+
+    setIsSavingForm(true)
+    try {
+      const res = await fetch(`/api/admin/usuarios/${editingUser!.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setFormError(json.error ?? 'Error al guardar')
+        return
+      }
+      setFormSuccess(true)
+      setUsuarios((prev) =>
+        prev.map((u) =>
+          u.id === editingUser!.id
+            ? { ...u, nombre: form.nombre, email: form.email }
+            : u
+        )
+      )
+      setTimeout(() => setEditingUser(null), 1500)
+    } catch {
+      setFormError('Error inesperado. Intentá de nuevo.')
+    } finally {
+      setIsSavingForm(false)
     }
   }
 
@@ -80,7 +144,6 @@ export default function UsuariosPage() {
       <Topbar title="Administración de usuarios" />
 
       <div className="flex-1 overflow-y-auto p-6 space-y-5">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShieldCheck size={18} className="text-[#851919]" />
@@ -116,21 +179,11 @@ export default function UsuariosPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Usuario
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Rol
-                  </th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Estado
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Registrado
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    Acciones
-                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Usuario</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Rol</th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">Estado</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">Registrado</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -138,41 +191,27 @@ export default function UsuariosPage() {
                   <tr key={usuario.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3">
                       <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {usuario.nombre ?? 'Sin nombre'}
-                        </p>
+                        <p className="text-sm font-medium text-gray-900">{usuario.nombre ?? 'Sin nombre'}</p>
                         <p className="text-xs text-gray-500">{usuario.email}</p>
                       </div>
                     </td>
 
                     <td className="px-4 py-3">
-                      {editingId === usuario.id ? (
-                        <select
-                          defaultValue={usuario.rol}
-                          onChange={(e) => {
-                            updateUsuario(usuario.id, { rol: e.target.value as RolUsuario })
-                          }}
-                          disabled={savingId === usuario.id}
-                          className="h-8 rounded border border-gray-300 bg-white px-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#851919]"
-                        >
-                          <option value="admin">Administrador</option>
-                          <option value="operador">Operador</option>
-                          <option value="consulta">Solo lectura</option>
-                        </select>
-                      ) : (
-                        <span
-                          className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${ROL_BADGE_CLASS[usuario.rol]}`}
-                        >
-                          {ROL_LABELS[usuario.rol]}
-                        </span>
-                      )}
+                      <select
+                        value={usuario.rol}
+                        onChange={(e) => updateRolActivo(usuario.id, { rol: e.target.value as RolUsuario })}
+                        disabled={savingId === usuario.id}
+                        className="h-8 rounded border border-gray-300 bg-white px-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#851919]"
+                      >
+                        <option value="admin">Administrador</option>
+                        <option value="operador">Operador</option>
+                        <option value="consulta">Solo lectura</option>
+                      </select>
                     </td>
 
                     <td className="px-4 py-3 text-center">
                       <button
-                        onClick={() =>
-                          updateUsuario(usuario.id, { activo: !usuario.activo })
-                        }
+                        onClick={() => updateRolActivo(usuario.id, { activo: !usuario.activo })}
                         disabled={savingId === usuario.id}
                         className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors ${
                           usuario.activo
@@ -180,26 +219,20 @@ export default function UsuariosPage() {
                             : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                         }`}
                       >
-                        <span
-                          className={`h-1.5 w-1.5 rounded-full ${usuario.activo ? 'bg-green-500' : 'bg-gray-400'}`}
-                        />
+                        <span className={`h-1.5 w-1.5 rounded-full ${usuario.activo ? 'bg-green-500' : 'bg-gray-400'}`} />
                         {usuario.activo ? 'Activo' : 'Inactivo'}
                       </button>
                     </td>
 
-                    <td className="px-4 py-3 text-sm text-gray-500">
-                      {formatDate(usuario.created_at)}
-                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{formatDate(usuario.created_at)}</td>
 
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         <Button
                           size="icon-sm"
                           variant="ghost"
-                          onClick={() =>
-                            setEditingId(editingId === usuario.id ? null : usuario.id)
-                          }
-                          title="Editar rol"
+                          onClick={() => openEditModal(usuario)}
+                          title="Editar usuario"
                         >
                           <Edit size={14} />
                         </Button>
@@ -212,6 +245,81 @@ export default function UsuariosPage() {
           </div>
         )}
       </div>
+
+      {/* Modal de edición */}
+      <Modal
+        open={!!editingUser}
+        onOpenChange={(open) => { if (!open) setEditingUser(null) }}
+        title="Editar usuario"
+        description={editingUser?.email}
+        size="sm"
+      >
+        {formSuccess ? (
+          <div className="flex items-start gap-2.5 rounded-lg border border-green-200 bg-green-50 px-3 py-2.5">
+            <CheckCircle size={15} className="mt-0.5 shrink-0 text-green-600" />
+            <p className="text-sm text-green-700">Cambios guardados correctamente.</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSaveForm} className="space-y-4">
+            <Input
+              label="Nombre"
+              value={form.nombre}
+              onChange={(e) => setForm((f) => ({ ...f, nombre: e.target.value }))}
+              placeholder="Nombre completo"
+              disabled={isSavingForm}
+            />
+            <Input
+              label="Email"
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+              placeholder="usuario@email.com"
+              disabled={isSavingForm}
+            />
+            <Input
+              label="Nueva contraseña"
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+              placeholder="Dejar vacío para no cambiar"
+              helperText="Mínimo 6 caracteres"
+              disabled={isSavingForm}
+            />
+            {form.password && (
+              <Input
+                label="Confirmar contraseña"
+                type="password"
+                value={form.confirmPassword}
+                onChange={(e) => setForm((f) => ({ ...f, confirmPassword: e.target.value }))}
+                placeholder="••••••••"
+                disabled={isSavingForm}
+              />
+            )}
+
+            {formError && (
+              <div className="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5">
+                <AlertCircle size={15} className="mt-0.5 shrink-0 text-red-600" />
+                <p className="text-sm text-red-700">{formError}</p>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setEditingUser(null)}
+                disabled={isSavingForm}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" size="sm" isLoading={isSavingForm}>
+                Guardar cambios
+              </Button>
+            </div>
+          </form>
+        )}
+      </Modal>
     </div>
   )
 }
